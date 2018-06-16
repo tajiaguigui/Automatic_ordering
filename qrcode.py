@@ -41,7 +41,7 @@ def empower():
     #对应第 1 步
     #rsp = requests.get("https://qrlogin.taobao.com/qrcodelogin/generateQRCode4Login.do?from=BGG请求登陆")
     #rsp = requests.get("https://qrlogin.taobao.com/qrcodelogin/generateQRCode4Login.do?adUrl=&adImage=&adText=&viewFd4PC=&viewFd4Mobile=&from=333&appkey=00000000&umid_token=C1527134546551258528758571527134546551723&_ksTS=1527134942603_4683")
-    rsp = requests.get("https://qrlogin.taobao.com/qrcodelogin/generateQRCode4Login.do?shortURL=true&adUrl=&adImage=&adText=&viewFd4PC=&viewFd4Mobile=&from=333&appkey=00000000&umid_token=" + str(umid_token))
+    rsp = requests.get("https://qrlogin.taobao.com/qrcodelogin/generateQRCode4Login.do?shortURL=true&adUrl=&adImage=&adText=&viewFd4PC=&viewFd4Mobile=&from=金霖国际&appkey=00000000&umid_token=" + str(umid_token))
     b = json.loads(rsp.text)
 
 

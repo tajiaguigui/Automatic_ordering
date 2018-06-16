@@ -6,9 +6,9 @@ import time
 import re
 # import psutil
 import sys
+from lxml import etree
 
-
-pool = redis.ConnectionPool(host='localhost', port=6379, decode_responses=True)
+pool = redis.ConnectionPool(host='localhost', port=6379, decode_responses=True, db=0)
 r = redis.Redis(connection_pool=pool)
 
 
@@ -23,47 +23,49 @@ def automatic():
     # print(driver.current_url)
     # username = driver.verify_login()
     # print(username)
-    elem = driver.find_element_by_name("q")
-    # 输入关键词
-    elem.send_keys("男装")
-    time.sleep(1)
-    elem.send_keys(Keys.RETURN)
-    #浏览网页
-    driver.find_element_by_xpath("//a[@class='J_Ajax num icon-tag']/span[1]").click()
-    time.sleep(3)
-    #继续点击下一页
-    driver.find_element_by_xpath("//a[@class='J_Ajax num icon-tag']/span[1]").click()
-    time.sleep(2)
-    #选择一个宝贝
-    driver.find_element_by_xpath("//*[@id='mainsrp-itemlist']/div/div/div[1]/div[2]/div[1]/div/div[1]").click()
+    lists = r.lrange("urls", 0,-1)
+    print(lists)
+    for data in lists:
+        print(data)
+        driver = webdriver.Chrome()
+        driver.get(data)
+        html = etree.HTML(driver.page_source)
+        name = html.xpath('//*[contains(@class, "J_MemberNick")]/text()')
+        if len(name) >= 1:
+            #self.login_signal = 1
+            username = name[0]
+            print(username)
+            time.sleep(1)
+            elem = driver.find_element_by_name("q")
+            # 输入关键词
+            elem.send_keys("男装")
+            time.sleep(1)
+            elem.send_keys(Keys.RETURN)
+            #浏览网页
+            driver.find_element_by_xpath("//a[@class='J_Ajax num icon-tag']/span[1]").click()
+            time.sleep(1)
+            #继续点击下一页
+            driver.find_element_by_xpath("//a[@class='J_Ajax num icon-tag']/span[1]").click()
+            time.sleep(2)
+            #选择一个宝贝
+            driver.find_element_by_xpath("//*[@id='mainsrp-itemlist']/div/div/div[1]/div[2]/div[1]/div/div[1]").click()
 
-    time.sleep(1)
-    driver.quit()
+            time.sleep(1)
+            print("下单成功，退出浏览器")
+            driver.quit()
+            r.lrem("urls", data)
+        else:
+            time.sleep(1)
+            driver.quit()
+            print('验证登录中')
+            r.lrem("urls", data)
+            continue
+
+
+
+
+
 
 automatic()
 
-import redis  
-  
-pool = redis.ConnectionPool(host='127.0.0.1', port=6379, db=0)  
-r = redis.Redis(connection_pool=pool)  
-  
-pipe = r.pipeline()  
-pipe_size = 100000  
-  
-len = 0  
-key_list = []  
-print r.pipeline()  
-keys = r.keys()  
-for key in keys:  
-    key_list.append(key)  
-    pipe.get(key)  
-    if len < pipe_size:  
-        len += 1  
-    else:  
-        for (k, v) in zip(key_list, pipe.execute()):  
-            print k, v  
-        len = 0  
-        key_list = []  
-  
-for (k, v) in zip(key_list, pipe.execute()):  
-    print k, v  
+

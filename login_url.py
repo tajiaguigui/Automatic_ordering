@@ -19,11 +19,11 @@ proxies = {
 sess = requests.session()
 sess.headers = headers
 
-pool = redis.ConnectionPool(host='localhost', port=6379, decode_responses=True)
+pool = redis.ConnectionPool(host='localhost', port=6379, decode_responses=True, db=0)
 r = redis.Redis(connection_pool=pool)
 
 def login():
-    lists = r.lrange("token", 0,-1)
+    lists = r.lrange("tokens", 0,-1)
     print(lists)
     for data in lists:
         token = eval(data)
@@ -41,9 +41,10 @@ def login():
 
         if 10006 == code:
             successLoginURL = b['url'] + "&umid_token=" + str(umid_token)
-            r.lpush("url", successLoginURL)
-            print(r.lindex("url", 0))
+            r.lpush("urls", successLoginURL)
+            print(r.lindex("urls", 0))
             print(successLoginURL)
+            r.lrem("tokens", token)
             print("登录成功，正在跳转")
 #        if 10000 == code:
 #            print("请扫描二维码登录")
@@ -60,7 +61,7 @@ def login():
 
 
         else:
-            r.lrem("token", token)
+            r.lrem("tokens", token)
             print("未知错误，退出执行")
             #sys.exit(0)
             #cookies = rsp.cookies.get_dict()
@@ -71,6 +72,7 @@ def login():
             # r = sess.get(b['url'])
             # cookies = rsp.cookies.get_dict()
             # print(cookies)
+
 
 
 if __name__ == '__main__':

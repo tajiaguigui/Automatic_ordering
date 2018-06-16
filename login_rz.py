@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, request
 from qrcode import empower
 # import uuid
 import redis
@@ -16,7 +16,11 @@ def index():
 @app.route('/qrcode', methods=['GET', 'POST'])
 def qrcode():
     url, lgToken, umid_token = empower()
-    r.lpush("token", (lgToken, umid_token))
+    ip = request.remote_addr
+    task_id = request.args.get('task_id')
+    r.set("task_id", task_id)
+    print('IP:{}的umid_token是:{}'.format(ip, umid_token))
+    r.lpush("tokens", (lgToken, umid_token))
     # uuid = uuid.uuid1()
     return redirect(url)
 
