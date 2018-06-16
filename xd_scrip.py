@@ -11,7 +11,23 @@ from lxml import etree
 pool = redis.ConnectionPool(host='localhost', port=6379, decode_responses=True, db=0)
 r = redis.Redis(connection_pool=pool)
 
-
+def ordering():
+    task_id = r.get("task_id")
+    rsp = requests.get('handler.ashx?action_string={}&task_id={}'.
+                     format(action_string, task_id))
+    if rsp.status_code != 200:
+        response = {
+            "resultcode": "404",
+            "reason": "查询失败",
+            "result": None
+        }
+        return jsonify(response)
+    data = json.loads(r.content.decode('utf-8'))
+    l = json.loads(data['data']['task_list'])
+    words = l[0]['tb_words']
+    # print(words)
+    return words
+    
 
 def automatic():
 
@@ -31,7 +47,7 @@ def automatic():
         driver.get(data)
         html = etree.HTML(driver.page_source)
         name = html.xpath('//*[contains(@class, "J_MemberNick")]/text()')
-        if len(name) >= 1:
+        if len(name) >= 1 and name != "你好":
             #self.login_signal = 1
             username = name[0]
             print(username)
@@ -64,8 +80,11 @@ def automatic():
 
 
 
+if __name__ == "__main__":
+    words = ordering()
+    print(words)
+    automatic()
 
 
-automatic()
 
 
