@@ -24,16 +24,16 @@ r = redis.Redis(connection_pool=pool)
 
 def login():
     lists = r.lrange("tokens", 0,-1)
-    print(lists)
+    # print(lists)
     for data in lists:
         token = eval(data)
         lgToken = token[0]
         umid_token = token[1]
-        print(lgToken)
-        print(umid_token)
+        # print(lgToken)
+        # print(umid_token)
         url = "https://qrlogin.taobao.com/qrcodelogin/qrcodeLoginCheck.do?lgToken=" + str(lgToken)
         url += "&defaulturl=https%3A%2F%2Fwww.taobao.com%2F&_ksTS=1460659151617_231&umid_token=" + str(umid_token)
-        print(url)
+        # print(url)
         rsp = sess.get(url)
         b = json.loads(rsp.text)
         code = int(b['code'])
@@ -42,7 +42,7 @@ def login():
         if 10006 == code:
             successLoginURL = b['url'] + "&umid_token=" + str(umid_token)
             r.lpush("urls", successLoginURL)
-            print(r.lindex("urls", 0))
+            # print(r.lindex("urls", 0))
             print(successLoginURL)
             r.lrem("tokens", token)
             print("登录成功，正在跳转")
